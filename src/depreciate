@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+import optparse
+import os
+import platform
+import sys
+import codecs
+import datetime
+import Depreciation
+from dateutil.parser import parse
+from dateutil.relativedelta import *
+import calendar
+
+currencyvar = "$"
+
+def checkDate(mstr):
+    try:
+        return parse(mstr).strftime('%Y/%m/%d').strip()
+    except Exception as inst:
+        return datetime.date.today().isoformat().replace('-','/').strip()
+
+def getDate(mstr):
+	try:
+		return parse(mstr)
+	except Exception as inst:
+		return datetime.date.today()
+
+
+def myNewLine():
+	if platform.system() == 'Windows':
+		return "\r\n"
+	else:
+		return "\n"
+
+def isReturnFile(myfile):
+	if os.path.abspath(os.path.expanduser(myfile.strip())) != False:
+		return os.path.abspath(os.path.expanduser(myfile.strip()))
+	else:
+		print 'You can\'t save to that location'
+		sys.exit()
+
+
+def SaveFile(transaction,myfile):
+	mf = isReturnFile(myfile)
+	if os.path.isfile(mf):
+		fout = codecs.open(mf, "a", "utf-8")
+		fout.write(unicode(myNewLine(), "utf-8"))
+	else:
+		fout = codecs.open(mf, "w", "utf-8")
+	fout.write(unicode(transaction,"utf-8"))
+	fout.close()
+	print 'Saved File!'
+
+def GetTransactions(method,cost,residual,asset,expense,payment,periods,dt,note,ptype):
+	global currencyvar
+	transactions = ""
+	transactionobj = Depreciation.DepreciationSchedule(method,periods,cost,residual)
+	if transactionobj == False:
+		print "Sorry, something about those numbers doesn't make sense!"
+		sys.exit()
+	else:
+		transactionlist = transactionobj.Schedule()
+		
+	
+	startline = checkDate(dt) + " * " + note.strip()
+	debitline = "\t" + asset.strip() + "\t\t" + currencyvar.strip() + str(round(cost, 2))
+	creditline = "\t" + payment.strip()
+	transactions = startline + myNewLine() + debitline + myNewLine() + creditline
+	activedate = getDate(dt)
+	
+	if ptype.lower().strip() == 'months' or ptype.lower().strip() == 'month':
+		relativedate = relativedelta(months=+1)
+	elif ptype.lower().strip() == 'days' or ptype.lower().strip() == 'day':
+		relativedate = relativedelta(days=+1)
+	else:
+		relativedate = relativedelta(years=+1)
+	
+	for s in transactionlist:
+		activedate=activedate+relativedate
+		startline = activedate.strftime('%Y/%m/%d').strip() + " * " + note.strip()
+		debitline = "\t" + expense.strip() + "\t\t" + currencyvar.strip() + str(s)
+		creditline = "\t" + asset.strip() + ":Accumulated Depreciation"
+		transactions = transactions + myNewLine() + startline + myNewLine() + debitline + myNewLine() + creditline
+	return transactions
+		
+
+def main():
+	desc = 'This tool allows you to create a depreciation schedule for Ledger'
+	p = optparse.OptionParser(description=desc)
+	global currencyvar
+	todaysdate = datetime.date.today().isoformat().replace('-','/').strip()
+	accounting = optparse.OptionGroup(p, 'Accounting Options')
+	accounting.add_option('--method', '-m', dest="method", help="Define the depreciation methodology to use.  Accepts, double declining balance (DDB), sum of the years digits (SUM) or straight-line (straight).", default='straight-line', metavar='"DDB"')
+	accounting.add_option('--cost', '-c', dest="cost", help="Cost of the asset you want to depreciate", type='float',default=0, metavar='"1000"')
+	accounting.add_option('--periods', '-p', dest="periods", help="The number of periods you wish to depreciate over", type='int', default=10, metavar='"10"')
+	accounting.add_option('--periodtype', '-t', dest="ptype", help="The type of periods to use (days, months, years)", default='years', metavar='"years"')
+	accounting.add_option('--residual', '-r', dest="residual", help="The residual (or scrap) value of the asset", type='float', default=0, metavar='"100"')
+	accounting.add_option('--asset', '-a', dest="asset", help="Asset account", default='Assets:Default Asset', metavar='"Assets:Computers"')
+	accounting.add_option('--expense', '-e', dest="expense", help="Expense account", default='Equity:Expenses:Depreciation Expense', metavar='"Equity:Expenses:Depreciation Expense"')
+	accounting.add_option('--payment', '-o', dest="payment", help="Account that you used to buy the asset", default='Assets:Checking', metavar='"Assets:Checking"')
+	accounting.add_option('--date', '-d', dest="date", help="Date of asset purchase", default=todaysdate, metavar='"' + todaysdate + '"')
+	accounting.add_option('--note', '-n', dest="note", help="Memo line note", default='Asset Purchase', metavar='"Asset Purchase"')
+	
+	
+	output = optparse.OptionGroup(p, 'Output Options')
+	output.add_option('--currency', dest="currency", help="Currency character in data", default='', metavar='"$"')
+	output.add_option('--save', '-s', dest="savefile", help="Save output to a file", default='', metavar='"<File Path>"')
+	
+	p.add_option_group(accounting)
+	p.add_option_group(output)
+	(options, arguments) = p.parse_args();
+	
+	if len(options.currency.strip())>0:
+		currencyvar = options.currency.strip()
+	
+	if len(options.asset.strip())>0 and len(options.expense.strip())>0 and len(options.payment.strip())>0 and options.cost>0:
+		transactions = GetTransactions(options.method.strip(),options.cost,options.residual,options.asset.strip(),options.expense.strip(),options.payment.strip(),options.periods,options.date.strip(),options.note.strip(),options.ptype.strip())
+	else:
+		print "You have to specify at least a cost of the asset"
+		sys.exit()
+	
+	if len(options.savefile.strip())>0:
+		SaveFile(transactions,options.savefile.strip())
+		sys.exit()
+	else:
+		print unicode(transactions,"utf-8")
+		sys.exit()
+
+
+if __name__ == '__main__':
+	main()

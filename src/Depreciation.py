@@ -37,7 +37,7 @@ class DepreciationSchedule:
 	def Straight(self):
 		cost = float(self.cost-self.residual)
 		perperiodcost = round(cost/self.periods, 2)
-		lastperiod = cost-perperiodcost*(self.periods-1)
+		lastperiod = round(float(cost-perperiodcost*(self.periods-1)), 2)
 		schedule = []
 		i = 0
 		
@@ -66,9 +66,9 @@ class DepreciationSchedule:
 			i=i+1
 			expense = round(float(balance*percentage), 2)
 			if i == periods:
-				expense = adjcost
+				expense = round(adjcost, 2)
 			elif expense > adjcost and adjcost>0:
-				expense = adjcost
+				expense = round(adjcost, 2)
 			elif expense > adjcost:
 				expense = 0			
 			if expense>0:
@@ -95,9 +95,9 @@ class DepreciationSchedule:
 			cperiod = float(cperiod - 1)
 			expense = round(float(percentage*cost), 2)
 			if cperiod==0:
-				expense = balance
+				expense = round(balance, 2)
 			elif expense > balance and balance>0:
-				expense = balance
+				expense = round(balance, 2)
 			elif expense > balance:
 				expense = 0
 			

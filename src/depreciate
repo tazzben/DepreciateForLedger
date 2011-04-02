@@ -51,6 +51,22 @@ def SaveFile(transaction,myfile):
 	fout.close()
 	print 'Saved File!'
 
+
+def TestDateRanage(ptype,periods,activedate):
+	try:
+		if ptype.lower().strip() == 'months' or ptype.lower().strip() == 'month':
+			relativedatem = relativedelta(months=+periods)
+		elif ptype.lower().strip() == 'days' or ptype.lower().strip() == 'day':
+			relativedatem = relativedelta(days=+periods)
+		else:
+			relativedatem = relativedelta(years=+periods)
+		testdate = activedate+relativedatem
+		return True;
+	except Exception as inst:
+		print "Sorry, that date is out of range"
+		sys.exit()
+		return False;
+
 def GetTransactions(method,cost,residual,asset,expense,payment,periods,dt,note,ptype):
 	global currencyvar
 	transactions = ""
@@ -74,6 +90,8 @@ def GetTransactions(method,cost,residual,asset,expense,payment,periods,dt,note,p
 		relativedate = relativedelta(days=+1)
 	else:
 		relativedate = relativedelta(years=+1)
+	
+	TestDateRanage(ptype.lower().strip(),periods,activedate)
 	
 	for s in transactionlist:
 		activedate=activedate+relativedate

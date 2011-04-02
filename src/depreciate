@@ -108,7 +108,7 @@ def main():
 	global currencyvar
 	todaysdate = datetime.date.today().isoformat().replace('-','/').strip()
 	accounting = optparse.OptionGroup(p, 'Accounting Options')
-	accounting.add_option('--method', '-m', dest="method", help="Define the depreciation methodology to use.  Accepts, double declining balance (DDB), sum of the years digits (SUM) or straight-line (straight).  Additionally, you can specify 'mixed' which will use DDB for the first half of the periods and straight-line for the remainder.", default='straight-line', metavar='"straight-line"')
+	accounting.add_option('--method', '-m', dest="method", help="Define the depreciation methodology to use.  Accepts, double declining balance (DDB), sum of the years digits (SUM) or straight-line (straight).  Additionally, you can specify 'mixed' which will use DDB for the first half of the periods and straight-line for the remainder.", default='straight', metavar='"straight"')
 	accounting.add_option('--cost', '-c', dest="cost", help="Cost of the asset you want to depreciate", type='float',default=0, metavar='"1000"')
 	accounting.add_option('--periods', '-p', dest="periods", help="The number of periods you wish to depreciate over", type='int', default=10, metavar='"10"')
 	accounting.add_option('--periodtype', '-t', dest="ptype", help="The type of periods to use (days, months, years)", default='years', metavar='"years"')

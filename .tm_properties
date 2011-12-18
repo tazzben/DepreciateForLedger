@@ -1,0 +1,3 @@
+projectDirectory = "$CWD"
+windowTitle      = "$TM_DISPLAYNAME — depreciateForLedger"
+fileChooserGlob  = "{{src,Shared/include}/**/*.{sh,py,textile},target{,s},Makefile{,.*},.tm_properties}"

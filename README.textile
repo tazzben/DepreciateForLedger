@@ -256,6 +256,17 @@ h3. Example File:
 	Assets:Cars:Accumulated Depreciation
 </pre>
 
+h2. The Super Easy Way to Install (Macports)
+
+You can install this application using MacPorts!  Type the following:
+
+<pre>
+sudo port -v selfupdate
+sudo port install DepreciateForLedger
+</pre>
+
+This method takes care of all dependancies and can manage updates for you.  For information on installing MacPorts, please visit "their site":http://www.macports.org/install.php.
+
 h2. Installing:
 
 Installing depreciate is pretty easy. Because Macs and Linux already include Python, all you need to do is download the depreciate source, decompress it, and move it wherever you want. Of course, if you use depreciate a lot you might want to "add your installation location to your PATH variable":http://kb.wbpsystems.com/index.php/article/setting-your-path-variable.
